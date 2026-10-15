@@ -21,6 +21,10 @@ scpc2026/
 
 ### 예선 1차: 결정적 에이전트 하네스
 
+<p align="center">
+  <img src="docs/images/architecture/round1-deterministic-harness.png" alt="예선 1차 결정적 에이전트 하네스 아키텍처" width="100%">
+</p>
+
 예선 1차 과제는 task JSON에 담긴 기기 상태, 대화 기록, 세션 메모와 정책 신호를 해석해 정해진 answer JSON을 만드는 문제였습니다. 외부 모델이나 API를 호출하지 않고 입력에 포함된 근거만으로 대상, 제어 방식, 허용 범위, 정책과 행동 계획을 결정했습니다.
 
 최종 구현은 잘못된 타입과 누락 필드를 안전하게 정규화하고, 명시적인 turn 순서와 최신 상태를 우선하도록 구성했습니다. 또한 근거가 부족하거나 서로 충돌하면 임의로 실행하지 않고 확인을 요청하도록 설계했습니다. 구조·타입·입력 순서를 변형한 34,299건의 퍼즈 테스트에서 예외와 출력 스키마 위반이 발생하지 않았습니다.
@@ -28,6 +32,10 @@ scpc2026/
 자세한 내용과 실행 방법은 [round1/README.md](round1/README.md)에 정리했습니다.
 
 ### 예선 2차: SafeShare
+
+<p align="center">
+  <img src="docs/images/architecture/round2-safeshare.png" alt="예선 2차 SafeShare 아키텍처" width="100%">
+</p>
 
 `SafeShare`는 업무방과 개인 대화방을 오가며 파일 공유 초안을 준비하는 Android 앱입니다. 사용자가 확인한 목적, 대상 대화방, 역할과 허용 범위를 다음 세션에 재사용하되, 조건이 달라지면 영향을 받은 부분만 보류하고 다시 확인합니다.
 
@@ -40,6 +48,19 @@ scpc2026/
 - 제품 UI와 평가용 Probe가 같은 production core를 사용하는 구조
 
 앱은 실행 중 LLM이나 외부 백엔드를 사용하지 않으며, 실제 메시지 발송과 외부 전송도 수행하지 않습니다. 자세한 내용과 빌드 방법은 [round2/README.md](round2/README.md)에 정리했습니다.
+
+#### 실제 앱 화면
+
+아래 이미지는 최종 제출 `APP.apk`를 Android 15/API 35 에뮬레이터에서 직접 실행해 캡처했습니다. 화면에 표시되는 파일명, 대화방과 처리 기록은 모두 합성 예시입니다.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/images/app/home.png" alt="SafeShare 파일 화면" width="210"><br><sub><b>파일 선택</b></sub></td>
+    <td align="center"><img src="docs/images/app/review.png" alt="SafeShare 에이전트 처리 화면" width="210"><br><sub><b>기준 확인과 재사용</b></sub></td>
+    <td align="center"><img src="docs/images/app/scenarios.png" alt="SafeShare 시나리오 화면" width="210"><br><sub><b>반복 업무 시나리오</b></sub></td>
+    <td align="center"><img src="docs/images/app/settings.png" alt="SafeShare 처리 기록 화면" width="210"><br><sub><b>처리 기록과 검증</b></sub></td>
+  </tr>
+</table>
 
 ## 공개 범위
 
@@ -54,7 +75,7 @@ scpc2026/
 
 ## 개발 보조 도구
 
-개발 과정에서 OpenAI Codex와 Anthropic Claude를 구현, 코드 검토, 테스트 작성과 문서 초안에 사용했습니다. 두 도구는 개발 시점에만 사용했으며, 공개한 프로그램은 실행 중에 모델을 호출하지 않습니다.
+개발 과정에서 OpenAI Codex와 Anthropic Claude를 구현, 코드 검토, 테스트 작성과 문서 초안에 사용했습니다. 두 아키텍처 이미지는 실제 소스 구조를 바탕으로 OpenAI 이미지 생성 도구로 제작한 뒤 구성 요소와 연결 관계를 검수했습니다. 이 도구들은 개발 시점에만 사용했으며, 공개한 프로그램은 실행 중에 모델을 호출하지 않습니다.
 
 ## 라이선스
 

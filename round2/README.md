@@ -4,12 +4,33 @@
 
 예선 2차 제출은 완료했지만 본선에는 진출하지 못했습니다. 이 디렉터리에는 최종 제출 `SOURCE.zip`의 소스와 재현 문서를 보존했으며, APK·서명 자료·평가 evidence는 포함하지 않았습니다.
 
+## 아키텍처
+
+<p align="center">
+  <img src="../docs/images/architecture/round2-safeshare.png" alt="예선 2차 SafeShare 아키텍처" width="100%">
+</p>
+
+제품 UI와 평가용 Probe는 동일한 `SafeShareCore`를 사용합니다. 코어는 durable state와 action ledger를 함께 관리하며, 프로세스가 다시 시작되면 달라진 의존성만 복구합니다. 비교 모드는 같은 snapshot을 `FULL`과 `CLAIM-OFF`로 분리해 실행하므로 두 실행의 상태가 섞이지 않습니다.
+
 ## 사용자 흐름
 
 1. **E1 Learn**: TEXT, LINK 또는 PDF를 검토하고 목적, 대상, 현재 권한과 허용 범위를 확인합니다.
 2. **E2 Reuse**: 확인된 route와 안정적인 사실만 재사용해 app-local 공유 초안을 만듭니다.
 3. **E3 Exception**: room, role, scope 또는 link 접근 조건이 달라지면 영향을 받은 초안만 `HELD`로 저장하고 프로세스를 종료합니다.
 4. **E4 Recover**: 새로운 프로세스에서 checkpoint를 읽고, 달라진 의존성만 취소·재계획한 뒤 사용자 확인으로 복구합니다.
+
+## 실제 앱 화면
+
+최종 제출 `APP.apk`를 Android 15/API 35 에뮬레이터에서 직접 실행해 캡처했습니다. 표시된 파일명, 대화방과 처리 기록은 실제 개인정보나 대회 비공개 데이터가 아닌 합성 예시입니다.
+
+<table>
+  <tr>
+    <td align="center"><img src="../docs/images/app/home.png" alt="SafeShare 파일 화면" width="210"><br><sub><b>파일 선택</b></sub></td>
+    <td align="center"><img src="../docs/images/app/review.png" alt="SafeShare 에이전트 처리 화면" width="210"><br><sub><b>기준 확인과 재사용</b></sub></td>
+    <td align="center"><img src="../docs/images/app/scenarios.png" alt="SafeShare 시나리오 화면" width="210"><br><sub><b>반복 업무 시나리오</b></sub></td>
+    <td align="center"><img src="../docs/images/app/settings.png" alt="SafeShare 처리 기록 화면" width="210"><br><sub><b>처리 기록과 검증</b></sub></td>
+  </tr>
+</table>
 
 ## 핵심 구현
 

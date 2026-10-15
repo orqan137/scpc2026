@@ -10,6 +10,14 @@
 
 Public 순위는 시점에 따라 변동되어 기록이 일치하지 않으므로 이 문서에서는 별도로 주장하지 않습니다.
 
+## 아키텍처
+
+<p align="center">
+  <img src="../docs/images/architecture/round1-deterministic-harness.png" alt="예선 1차 결정적 에이전트 하네스 아키텍처" width="100%">
+</p>
+
+입력 JSON을 정규화한 뒤 최신 상태와 기록에서 판단 근거를 찾고, 정책 경계를 통과한 행동만 계획에 반영합니다. 근거가 부족하거나 충돌하면 `ASK` 또는 `HOLD`로 빠지며, 같은 입력은 항상 같은 answer JSON으로 변환됩니다.
+
 ## 파일 구성
 
 ```text
