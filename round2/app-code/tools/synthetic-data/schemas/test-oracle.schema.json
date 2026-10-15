@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.scpc.invalid/schemas/safeshare-test-oracle-v1.json",
+  "title": "SafeShare test-only oracle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "scenario_id",
+    "input_sha256",
+    "policy_spec_revision",
+    "assertions",
+    "pair_relations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "safeshare.oracle.v1"
+    },
+    "artifact_kind": {
+      "const": "safeshare_test_oracle"
+    },
+    "scenario_id": {
+      "type": "string",
+      "pattern": "^SS-KO-[0-9]{4}$"
+    },
+    "input_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "policy_spec_revision": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{2,80}$"
+    },
+    "assertions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/assertion"
+      }
+    },
+    "pair_relations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/pairRelation"
+      }
+    }
+  },
+  "$defs": {
+    "assertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["after_action", "path", "op"],
+      "properties": {
+        "after_action": {
+          "type": "string",
+          "pattern": "^E[1-4]\\.[A-Z_]+$"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^\\$.+"
+        },
+        "op": {
+          "enum": ["EQ", "NE", "GT", "ABSENT", "COUNT_EQ", "SAME_AS", "CHANGED_FROM"]
+        },
+        "value": {},
+        "reference": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "anyOf": [
+        {"required": ["value"]},
+        {"required": ["reference"]},
+        {
+          "properties": {
+            "op": {"const": "ABSENT"}
+          }
+        }
+      ]
+    },
+    "pairRelation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pair_id",
+        "counterpart_scenario_id",
+        "changed_input_pointers",
+        "relation",
+        "observed_paths"
+      ],
+      "properties": {
+        "pair_id": {
+          "type": "string",
+          "pattern": "^PAIR-[A-Z0-9-]{3,80}$"
+        },
+        "counterpart_scenario_id": {
+          "type": "string",
+          "pattern": "^SS-KO-[0-9]{4}$"
+        },
+        "changed_input_pointers": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^/"
+          }
+        },
+        "relation": {
+          "enum": ["SAME", "DIFFERENT"]
+        },
+        "observed_paths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^\\$.+"
+          }
+        }
+      }
+    }
+  }
+}

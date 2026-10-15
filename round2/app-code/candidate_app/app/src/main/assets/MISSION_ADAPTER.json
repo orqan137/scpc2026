@@ -1,0 +1,130 @@
+{
+  "schema_version": "3.0.0-draft",
+  "artifact_kind": "mission_probe_adapter",
+  "role_bindings": {
+    "PRIMARY_GOAL": {
+      "mission_meaning": "사용자가 안전 검토 후 기기 안에서 준비하려는 공유할 내용의 현재 목적·프로젝트",
+      "production_state_field": "state.facts[*].goal (JSON scalar type-preserving identity)",
+      "evidence_path": "PUBLIC_PROBE_RESULT.step_results[*].selected_context_ids"
+    },
+    "TARGET_ENTITY": {
+      "mission_meaning": "현재 공유할 내용이 향할 수 있는 확인된 대화방의 opaque ID",
+      "production_state_field": "state.facts[*].entity + state.route_rules[*] backed by an ACTIVE STABLE fact",
+      "evidence_path": "PUBLIC_PROBE_RESULT.step_results[*].preserved_state_ids"
+    },
+    "DISTRACTOR_ENTITY": {
+      "mission_meaning": "개인방·다른 프로젝트처럼 현재 공유에서 제외해야 하는 대화방 또는 관계",
+      "production_state_field": "state.facts[*][kind=DISTRACTOR].entity",
+      "evidence_path": "PUBLIC_PROBE_RESULT.step_results[operation=ADVANCE_SESSION].preserved_state_ids + step_results[operation=REQUEST_DECISION].selected_context_ids(absent)"
+    },
+    "STABLE_VALUE": {
+      "mission_meaning": "사용자가 확인한 대화방 용도·프로젝트 경계·허용 범위",
+      "production_state_field": "state.facts[*][kind=STABLE].value",
+      "evidence_path": "PUBLIC_PROBE_RESULT.step_results[*].state_after_sha256"
+    },
+    "ONE_OFF_VALUE": {
+      "mission_meaning": "이번 자료의 상태·버전·링크 접근 여부처럼 다음 session에 만료되는 조건",
+      "production_state_field": "state.facts[*][kind=ONE_OFF].value",
+      "evidence_path": "PUBLIC_PROBE_RESULT.step_results[*].state_after_sha256"
+    },
+    "CURRENT_AUTHORITY": {
+      "mission_meaning": "과거 방 기준보다 우선하는 최신 사용자 확인·현재 역할·승인",
+      "production_state_field": "state.facts[*].authority",
+      "evidence_path": "PUBLIC_PROBE_RESULT.step_results[*].invalidated_state_ids"
+    },
+    "REVOKED_SCOPE": {
+      "mission_meaning": "더 이상 공유할 내용의 대상으로 사용할 수 없도록 철회된 허용 범위",
+      "production_state_field": "state.revoked_scope_rules[*](goal+entity+scope) + state.facts[*].status + state.draft_parts[*].status",
+      "evidence_path": "PUBLIC_PROBE_RESULT.step_results[*].invalidated_state_ids"
+    },
+    "PRESERVED_SCOPE": {
+      "mission_meaning": "조건 변경 뒤에도 유지되는 업무·개인 경계와 secret 제외 원칙",
+      "production_state_field": "state.facts[*].scope + state.draft_parts[*][scope_role=PRESERVED]",
+      "evidence_path": "PUBLIC_PROBE_RESULT.step_results[*].preserved_state_ids"
+    },
+    "DELAYED_OUTCOME": {
+      "mission_meaning": "나중에 도착해 링크 접근 또는 검토 상태를 바꾸는 로컬 검사 결과",
+      "production_state_field": "state.pending_delayed_outcomes[*](goal+entity+registered evidence+dependencies) -> state.delayed_outcomes[*] -> state.decision_traces[*].cause_outcome_ids + invalidated_pending_outcome_scope_fingerprints[*]",
+      "evidence_path": "PUBLIC_PROBE_RESULT.step_results[operation=ADVANCE_TIME|REQUEST_DECISION].decision_state + selected_context_ids"
+    },
+    "EPHEMERAL_VALUE": {
+      "mission_meaning": "삭제 뒤 state·export·relaunch에서 되살아나면 안 되는 원문·URI·민감 설정값",
+      "production_state_field": "state.share_envelopes[*].raw_text -> state.facts[*][kind=EPHEMERAL].value",
+      "evidence_path": "PUBLIC_PROBE_RESULT.step_results[operation=DELETE_FACT].invalidated_state_ids + tombstone_ids"
+    }
+  },
+  "operation_bindings": {
+    "RESET_AND_START": {
+      "production_callback": "SafeShareCore.resetAllUserData() / execute(RESET_AND_START) -> resetRunState",
+      "observable_evidence": "새 run의 clean fact·draft와 invocation counter 0; 같은 run의 추가 Reset은 앞선 receipt·evidence·decision trace를 보존"
+    },
+    "UPSERT_FACT": {
+      "production_callback": "SafeShareCore.receiveSharedText() / execute(UPSERT_FACT) -> shared facts ledger",
+      "observable_evidence": "purpose·entity·authority·scope가 있는 routing fact ID와, 입력에 함께 온 DELAYED_OUTCOME의 durable pending ID"
+    },
+    "ADVANCE_SESSION": {
+      "production_callback": "SafeShareCore.execute(ADVANCE_SESSION)",
+      "observable_evidence": "새 session ID, 계속 유효한 routing fact ID, 만료 ONE_OFF fact와 그 의존 proposal/draft/part의 연쇄 취소 ID, 실제 존재하지만 선택되지 않는 distractor ID"
+    },
+    "REQUEST_DECISION": {
+      "production_callback": "SafeShareCore.receiveSharedText() route reuse / execute(REQUEST_DECISION) -> shared route facts",
+      "observable_evidence": "ACT·ASK·WAIT·ABSTAIN, 선택·재사용 context 수, 필요 확인 수, delayed outcome의 source/result evidence 결박"
+    },
+    "CORRECT_FACT": {
+      "production_callback": "SafeShareCore.proposeRoute()+confirmPendingRoute() / execute(CORRECT_FACT) -> shared facts, drafts, actions",
+      "observable_evidence": "같은 goal·target·kind의 이전 fact와 그 fact에 직접 의존한 draft만 취소되고 다른 goal의 동일 target은 보존됨"
+    },
+    "REVOKE_SCOPE": {
+      "production_callback": "SafeShareCore.execute(REVOKE_SCOPE)",
+      "observable_evidence": "goal·target·opaque scope의 exact 철회 rule, 해당 fact/part의 invalidated ID와 영향받지 않은 현재 authority fact·main part 보존 ID"
+    },
+    "DELETE_FACT": {
+      "production_callback": "SafeShareCore.deleteShareMemory() / execute(DELETE_FACT) -> shared tombstone and dependency cancellation",
+      "observable_evidence": "명시 값은 goal·target·kind·value exact 삭제, 값 미지정은 EPHEMERAL·ONE_OFF만 삭제; 직접 의존한 draft·outcome·stale route 취소와 비가역 tombstone ID"
+    },
+    "SET_NETWORK": {
+      "production_callback": "SafeShareCore.execute(SET_NETWORK)",
+      "observable_evidence": "ONLINE이 아닌 OFFLINE·DELAYED·UNKNOWN 모두 외부 성공을 가장하지 않는 WAIT"
+    },
+    "PROCESS_KILL_RELAUNCH": {
+      "production_callback": "SafeShareCore.ensureProcessEpoch() / execute(PROCESS_KILL_RELAUNCH) -> durable shared ledger",
+      "observable_evidence": "실제 재실행 뒤 증가한 process epoch, durable routing·proposal·모든 active delayed outcome ledger, 동일 action의 idempotent reconcile"
+    },
+    "REPLAY_EVENT": {
+      "production_callback": "SafeShareCore.receiveSharedText(duplicate event) / execute(REPLAY_EVENT) -> idempotent shared ledger",
+      "observable_evidence": "원래 local draft action과 동일한 idempotency key·outcome"
+    },
+    "DELIVER_OUT_OF_ORDER": {
+      "production_callback": "SafeShareCore.execute(DELIVER_OUT_OF_ORDER)",
+      "observable_evidence": "최신 routing authority를 되돌리지 않는 ABSTAIN과 보존 state"
+    },
+    "ADVANCE_TIME": {
+      "production_callback": "SafeShareCore.execute(ADVANCE_TIME)",
+      "observable_evidence": "goal·target 계보로 UPSERT pending을 소비해 다른 문자열의 실제 outcome도 registered event/evidence/dependency를 유지하고, source 무효화 뒤 다른 값으로도 부활하지 않으며 후속 REQUEST_DECISION이 ASK→authority 확인→ACT 전이"
+    },
+    "EXPORT_AND_END": {
+      "production_callback": "SafeShareCore.execute(EXPORT_AND_END)",
+      "observable_evidence": "최종 state·local action ledger·모든 active/pending outcome·receipt·evidence ID"
+    }
+  },
+  "source_paths": [
+    "app/src/main/java/org/scpc/r2/safeshare/MainActivity.kt",
+    "app/src/main/java/org/scpc/r2/safeshare/SafeShareCore.kt",
+    "app/src/main/java/org/scpc/r2/safeshare/SafeShareId.kt",
+    "app/src/main/java/org/scpc/r2/safeshare/SafeShareComparison.kt",
+    "app/src/main/java/org/scpc/r2/safeshare/ScenarioParser.kt",
+    "app/src/main/java/org/scpc/r2/safeshare/ScenarioExecutor.kt",
+    "app/src/main/java/org/scpc/r2/safeshare/ScenarioCorpusAssetLoader.kt",
+    "app/src/main/java/org/scpc/r2/safeshare/SafeShareProbeAdapter.kt",
+    "app/src/main/java/org/scpc/r2/safeshare/SafeShareProbeBridge.kt",
+    "app/src/main/java/org/scpc/r2/safeshare/RunEvidenceArchive.kt",
+    "app/src/main/java/org/scpc/r2/safeshare/SafeSharePolicy.kt",
+    "app/src/main/java/org/scpc/r2/safeshare/SafeShareIntake.kt",
+    "app/src/test/java/org/scpc/r2/safeshare/SafeShareCoreTest.kt",
+    "app/src/test/java/org/scpc/r2/safeshare/SafeShareCoreHardeningTest.kt",
+    "app/src/test/java/org/scpc/r2/safeshare/SafeShareOfficialSequenceTest.kt",
+    "app/src/test/java/org/scpc/r2/safeshare/SafeShareProductFlowTest.kt",
+    "app/src/test/java/org/scpc/r2/safeshare/SafeShareComparisonTest.kt",
+    "app/src/test/java/org/scpc/r2/safeshare/ScenarioCorpusParameterizedTest.kt"
+  ]
+}

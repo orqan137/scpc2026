@@ -1,0 +1,129 @@
+{
+  "schema_version": "safeshare.source-provenance.v1",
+  "created_on": "2026-08-02",
+  "timezone": "Asia/Seoul",
+  "external_records_downloaded": false,
+  "external_records_redistributed": false,
+  "runtime_external_data_access": false,
+  "runtime_model_configured": false,
+  "policy": {
+    "pin_revision_before_access": true,
+    "require_shard_sha256_before_material_use": true,
+    "prohibit_source_text_in_app": true,
+    "prohibit_oracle_in_app_input": true,
+    "prohibit_real_personal_data": true,
+    "prohibit_operational_secrets": true,
+    "allowed_network_domain_suffix_for_scenarios": ".invalid"
+  },
+  "sources": [
+    {
+      "dataset_id": "nvidia/Nemotron-Personas-Korea",
+      "revision": "ada0f5b53a38bb5a30cce09358adde883c1ab63a",
+      "dataset_version_from_card": "1.0",
+      "license_spdx": "CC-BY-4.0",
+      "dataset_url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-Korea",
+      "pinned_card_url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-Korea/blob/ada0f5b53a38bb5a30cce09358adde883c1ab63a/README.md",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/legalcode",
+      "material_status": "REFERENCE_ONLY_NOT_DOWNLOADED",
+      "permitted_design_use": [
+        "age_band_coverage",
+        "region_band_coverage",
+        "work_context_coverage"
+      ],
+      "prohibited_fields_or_uses": [
+        "uuid_in_app",
+        "name_in_app",
+        "exact_age_in_app",
+        "district_in_app",
+        "verbatim_persona_in_app",
+        "culinary_or_food_derived_persona",
+        "demographic_to_speech_stereotyping",
+        "demographic_to_policy_decision"
+      ],
+      "upstream_notes": [
+        "The card lists KOSIS, Supreme Court of Korea, NHIS, KREI and NAVER Cloud as statistical or seed sources.",
+        "The card identifies one KREI source as KOGL Type 4.",
+        "The card contains inconsistent descriptions of field counts and name inclusion; actual pinned parquet schema must be allowlisted before any future access."
+      ],
+      "downloaded_files": []
+    },
+    {
+      "dataset_id": "BSC-LT/m-personas",
+      "revision": "6fab205a86a9244c90a2782e28055027f45ddd03",
+      "license_spdx": "Apache-2.0",
+      "dataset_url": "https://huggingface.co/datasets/BSC-LT/m-personas",
+      "pinned_card_url": "https://huggingface.co/datasets/BSC-LT/m-personas/blob/6fab205a86a9244c90a2782e28055027f45ddd03/README.md",
+      "license_url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+      "material_status": "REFERENCE_ONLY_NOT_DOWNLOADED",
+      "selected_split_if_later_approved": "ko",
+      "selected_split_rows_from_pinned_metadata": 31814,
+      "permitted_design_use": [
+        "korean_turn_structure_statistics",
+        "register_bucket_design",
+        "directness_bucket_design",
+        "light_noise_bucket_design"
+      ],
+      "prohibited_fields_or_uses": [
+        "source_text_access_or_redistribution",
+        "verbatim_messages_in_app",
+        "source_id_in_app",
+        "gender_or_occupation_bias_as_policy_input"
+      ],
+      "upstream_notes": [
+        "The card says synthetic personas were generated with DeepSeek-V3-0324.",
+        "The card says seed documents came from FineWeb2.",
+        "The card warns about gender and gender-occupation bias."
+      ],
+      "downloaded_files": []
+    },
+    {
+      "dataset_id": "huggingface-KREW/korean-role-playing",
+      "revision": "ceb55e96eddaee72dac60be5aa13e458125a1dc5",
+      "license_spdx": "Apache-2.0",
+      "dataset_url": "https://huggingface.co/datasets/huggingface-KREW/korean-role-playing",
+      "pinned_card_url": "https://huggingface.co/datasets/huggingface-KREW/korean-role-playing/blob/ceb55e96eddaee72dac60be5aa13e458125a1dc5/README.md",
+      "license_url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+      "material_status": "RESEARCH_ONLY_EXCLUDED_FROM_RELEASE",
+      "subset_rows_from_pinned_metadata": {
+        "general-roleplay-data": 32367,
+        "gf-persona-data": 1920,
+        "exa-data": 890,
+        "youtube-couple-data": 125
+      },
+      "permitted_design_use": [
+        "manual_korean_naturalness_reference"
+      ],
+      "prohibited_fields_or_uses": [
+        "all_subsets_as_release_material",
+        "youtube_transcript_reuse",
+        "romantic_gender_assumption_reuse",
+        "character_or_trademark_style_imitation",
+        "unmapped_upstream_row_reuse"
+      ],
+      "upstream_notes": [
+        "The card says youtube-couple-data was made from real YouTube subtitles but does not provide per-video rights provenance.",
+        "The card says general-roleplay-data was reconstructed from SmolTalk with gpt-4o-mini but does not pin the upstream revision or row mapping."
+      ],
+      "downloaded_files": []
+    }
+  ],
+  "local_generation": {
+    "generator": "app-code/tools/synthetic-data/generate.py",
+    "validator": "app-code/tools/synthetic-data/validate.py",
+    "source_kind": "repository_owned_synthetic_templates",
+    "standard_library_only": false,
+    "declared_python_dependencies": {
+      "jsonschema": "4.26.0",
+      "reportlab": "4.4.9",
+      "pypdf": "6.10.0"
+    },
+    "canonical_json": "UTF-8, NFC strings, sort_keys=true, separators=comma_colon, trailing_newline_for_files",
+    "default_scenario_count": 14,
+    "app_input_directory": "app-code/tools/synthetic-data/generated/app-input",
+    "test_oracle_directory": "app-code/tools/synthetic-data/generated/test-oracle",
+    "synthetic_pdf_directory": "app-code/tools/synthetic-data/generated/app-input/synthetic",
+    "synthetic_pdf_count": 3,
+    "synthetic_pdf_generator": "reportlab invariant mode",
+    "schema_contract": "JSON Schema Draft 2020-12 plus explicit cross-file checks"
+  }
+}

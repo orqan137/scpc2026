@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.venv-*/
+
+# Android / Gradle
+.gradle/
+**/build/
+local.properties
+*.apk
+*.aab
+*.aar
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+*.cer
+*.crt
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Generated and private competition artifacts
+round1/data/*.jsonl
+round1/output/
+round2/app-code/tools/synthetic-data/generated/
+SAMPLE_EXPORT/
+*.csv
+*.zip
+.env
+.env.*
